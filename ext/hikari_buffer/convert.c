@@ -121,3 +121,21 @@ VALUE rb_i64_to_value(int64_t value)
 {
     return LL2NUM(value);
 }
+
+float rb_value_to_f32(VALUE value)
+{
+    return (float)NUM2DBL(value);
+}
+double rb_value_to_f64(VALUE value)
+{
+    return NUM2DBL(value);
+}
+
+VALUE rb_f32_to_value(float value)
+{
+    return DBL2NUM((double)value);
+}
+VALUE rb_f64_to_value(double value)
+{
+    return DBL2NUM(value);
+}

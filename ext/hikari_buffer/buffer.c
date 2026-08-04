@@ -1,7 +1,7 @@
 #include "buffer.h"
 #include "convert.h"
 #include "io.h"
-
+#include <ruby/encoding.h>
 static VALUE
 buffer_alloc(VALUE klass);
 
@@ -206,6 +206,107 @@ DEFINE_READ_METHOD(u8,  uint8_t,  rb_u8_to_value)
 DEFINE_READ_METHOD(u16, uint16_t, rb_u16_to_value)
 DEFINE_READ_METHOD(u32, uint32_t, rb_u32_to_value)
 DEFINE_READ_METHOD(u64, uint64_t, rb_u64_to_value)
+DEFINE_WRITE_METHOD(i8,  int8_t,  rb_value_to_i8)
+DEFINE_WRITE_METHOD(i16, int16_t, rb_value_to_i16)
+DEFINE_WRITE_METHOD(i32, int32_t, rb_value_to_i32)
+DEFINE_WRITE_METHOD(i64, int64_t, rb_value_to_i64)
+DEFINE_READ_METHOD(i8,  int8_t,  rb_i8_to_value)
+DEFINE_READ_METHOD(i16, int16_t, rb_i16_to_value)
+DEFINE_READ_METHOD(i32, int32_t, rb_i32_to_value)
+DEFINE_READ_METHOD(i64, int64_t, rb_i64_to_value)
+
+DEFINE_WRITE_METHOD(f32, float, rb_value_to_f32)
+DEFINE_WRITE_METHOD(f64, double, rb_value_to_f64)
+DEFINE_READ_METHOD(f32, float, rb_f32_to_value)
+DEFINE_READ_METHOD(f64, double, rb_f64_to_value)
+
+
+static VALUE
+buffer_write_bytes(VALUE self, VALUE str)
+{
+    Buffer* buffer = get_buffer_struct(self);
+    Check_Type(str, T_STRING);
+    buffer_write(
+        buffer,
+        RSTRING_PTR(str),
+        RSTRING_LEN(str)
+    );
+    return self;
+}
+static VALUE
+buffer_read_bytes(VALUE self, VALUE len)
+{
+    Buffer* buffer = get_buffer_struct(self);
+    size_t length = NUM2SIZET(len);
+
+    VALUE str = rb_str_new(NULL, length);
+    buffer_read(
+        buffer,
+        RSTRING_PTR(str),
+        length
+    );
+    return str;
+}
+
+static VALUE
+buffer_write_string(VALUE self, VALUE str)
+{
+    Buffer *buffer = get_buffer_struct(self);
+
+    Check_Type(str, T_STRING);
+
+    size_t len = RSTRING_LEN(str);
+
+    if (len > UINT32_MAX) {
+        rb_raise(
+            rb_eRangeError,
+            "string is too large"
+        );
+    }
+
+    uint32_t length = (uint32_t)len;
+
+    buffer_write(
+        buffer,
+        &length,
+        sizeof(length)
+    );
+
+    buffer_write(
+        buffer,
+        RSTRING_PTR(str),
+        len
+    );
+
+    return self;
+}
+static VALUE
+buffer_read_string(VALUE self)
+{
+    Buffer *buffer = get_buffer_struct(self);
+
+    uint32_t length = 0;
+
+    buffer_read(
+        buffer,
+        &length,
+        sizeof(length)
+    );
+
+    VALUE str = rb_str_new(NULL, length);
+    rb_enc_associate(
+        str,
+        rb_utf8_encoding()
+    );
+
+    buffer_read(
+        buffer,
+        RSTRING_PTR(str),
+        length
+    );
+
+    return str;
+}
 
 static VALUE
 buffer_write_bool(VALUE self, VALUE val)
@@ -234,14 +335,7 @@ buffer_read_bool(VALUE self)
     return value ? Qtrue : Qfalse;
 }
 
-DEFINE_WRITE_METHOD(i8,  int8_t,  rb_value_to_i8)
-DEFINE_WRITE_METHOD(i16, int16_t, rb_value_to_i16)
-DEFINE_WRITE_METHOD(i32, int32_t, rb_value_to_i32)
-DEFINE_WRITE_METHOD(i64, int64_t, rb_value_to_i64)
-DEFINE_READ_METHOD(i8,  int8_t,  rb_i8_to_value)
-DEFINE_READ_METHOD(i16, int16_t, rb_i16_to_value)
-DEFINE_READ_METHOD(i32, int32_t, rb_i32_to_value)
-DEFINE_READ_METHOD(i64, int64_t, rb_i64_to_value)
+
 
 void
 Init_hikari_buffer_class(void)
@@ -330,6 +424,36 @@ Init_hikari_buffer_class(void)
     DEFINE_READ(i16);
     DEFINE_READ(i32);
     DEFINE_READ(i64);
+
+    DEFINE_WRITE(f32);
+    DEFINE_WRITE(f64);
+    DEFINE_READ(f32);
+    DEFINE_READ(f64);
+
+    rb_define_method(
+        rb_cBuffer,
+        "write_bytes",
+        buffer_write_bytes,
+        1
+    );
+    rb_define_method(
+        rb_cBuffer,
+        "read_bytes",
+        buffer_read_bytes,
+        1
+    );
+    rb_define_method(
+        rb_cBuffer,
+        "write_string",
+        buffer_write_string,
+        1
+    );
+    rb_define_method(
+        rb_cBuffer,
+        "read_string",
+        buffer_read_string,
+        0
+    );
 
     rb_define_method(
         rb_cBuffer,
