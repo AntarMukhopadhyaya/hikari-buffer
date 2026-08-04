@@ -206,4 +206,123 @@ RSpec.describe Hikari::Buffer do
       }.to raise_error(TypeError)
     end
   end
+  describe "primitive round trips" do
+  it "round trips u8" do
+    buffer.write_u8(255)
+
+    buffer.rewind
+
+    expect(buffer.read_u8).to eq(255)
+    expect(buffer.remaining).to eq(0)
+  end
+
+  it "round trips u16" do
+    buffer.write_u16(65_535)
+
+    buffer.rewind
+
+    expect(buffer.read_u16).to eq(65_535)
+    expect(buffer.remaining).to eq(0)
+  end
+
+  it "round trips u32" do
+    value = 4_294_967_295
+
+    buffer.write_u32(value)
+
+    buffer.rewind
+
+    expect(buffer.read_u32).to eq(value)
+    expect(buffer.remaining).to eq(0)
+  end
+
+  it "round trips u64" do
+    value = 18_446_744_073_709_551_615
+
+    buffer.write_u64(value)
+
+    buffer.rewind
+
+    expect(buffer.read_u64).to eq(value)
+    expect(buffer.remaining).to eq(0)
+  end
+
+  it "round trips i8" do
+    buffer.write_i8(-128)
+
+    buffer.rewind
+
+    expect(buffer.read_i8).to eq(-128)
+    expect(buffer.remaining).to eq(0)
+  end
+
+  it "round trips i16" do
+    buffer.write_i16(-32_768)
+
+    buffer.rewind
+
+    expect(buffer.read_i16).to eq(-32_768)
+    expect(buffer.remaining).to eq(0)
+  end
+
+  it "round trips i32" do
+    value = -2_147_483_648
+
+    buffer.write_i32(value)
+
+    buffer.rewind
+
+    expect(buffer.read_i32).to eq(value)
+    expect(buffer.remaining).to eq(0)
+  end
+
+  it "round trips i64" do
+    value = -9_223_372_036_854_775_808
+
+    buffer.write_i64(value)
+
+    buffer.rewind
+
+    expect(buffer.read_i64).to eq(value)
+    expect(buffer.remaining).to eq(0)
+  end
+
+  it "round trips true" do
+    buffer.write_bool(true)
+
+    buffer.rewind
+
+    expect(buffer.read_bool).to be(true)
+    expect(buffer.remaining).to eq(0)
+  end
+
+  it "round trips false" do
+    buffer.write_bool(false)
+
+    buffer.rewind
+
+    expect(buffer.read_bool).to be(false)
+    expect(buffer.remaining).to eq(0)
+  end
+end
+describe "mixed primitive round trip" do
+  it "reads values back in the order they were written" do
+    buffer
+      .write_u8(42)
+      .write_i16(-1234)
+      .write_u32(123_456)
+      .write_bool(true)
+      .write_i64(-987_654_321)
+
+    buffer.rewind
+
+    expect(buffer.read_u8).to eq(42)
+    expect(buffer.read_i16).to eq(-1234)
+    expect(buffer.read_u32).to eq(123_456)
+    expect(buffer.read_bool).to be(true)
+    expect(buffer.read_i64).to eq(-987_654_321)
+
+    expect(buffer.remaining).to eq(0)
+  end
+end
 end

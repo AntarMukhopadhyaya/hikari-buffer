@@ -7,6 +7,44 @@ buffer_alloc(VALUE klass);
 
 #define BUFFER_INITIAL_CAPACITY 1024
 
+#define DEFINE_WRITE_METHOD(NAME, TYPE, CONVERTER)      \
+static VALUE                                            \
+buffer_write_##NAME(VALUE self, VALUE val)              \
+{                                                       \
+    Buffer *buffer = get_buffer_struct(self);           \
+    TYPE value = CONVERTER(val);                        \
+                                                        \
+    buffer_write(                                       \
+        buffer,                                         \
+        &value,                                         \
+        sizeof(value)                                   \
+    );                                                  \
+                                                        \
+    return self;                                        \
+}
+
+#define DEFINE_READ_METHOD(NAME, TYPE, CONVERTER)      \
+static VALUE                                           \
+buffer_read_##NAME(VALUE self)                         \
+{                                                      \
+    Buffer *buffer = get_buffer_struct(self);          \
+    TYPE value;                                        \
+                                                       \
+    buffer_read(                                       \
+        buffer,                                        \
+        &value,                                        \
+        sizeof(value)                                  \
+    );                                                 \
+                                                       \
+    return CONVERTER(value);                           \
+}
+
+#define DEFINE_WRITE(NAME) \
+    rb_define_method(rb_cBuffer, "write_" #NAME, buffer_write_##NAME, 1)
+
+#define DEFINE_READ(NAME) \
+    rb_define_method(rb_cBuffer, "read_" #NAME, buffer_read_##NAME, 0)
+
 static void
 buffer_mark(void *ptr)
 {
@@ -160,121 +198,50 @@ buffer_seek(VALUE self, VALUE pos)
     return self;
 }
 
+DEFINE_WRITE_METHOD(u8,  uint8_t,  rb_value_to_u8)
+DEFINE_WRITE_METHOD(u16, uint16_t, rb_value_to_u16)
+DEFINE_WRITE_METHOD(u32, uint32_t, rb_value_to_u32)
+DEFINE_WRITE_METHOD(u64, uint64_t, rb_value_to_u64)
+DEFINE_READ_METHOD(u8,  uint8_t,  rb_u8_to_value)
+DEFINE_READ_METHOD(u16, uint16_t, rb_u16_to_value)
+DEFINE_READ_METHOD(u32, uint32_t, rb_u32_to_value)
+DEFINE_READ_METHOD(u64, uint64_t, rb_u64_to_value)
 
-static VALUE
-buffer_write_u8(VALUE self, VALUE val)
-{
-    Buffer *buffer = get_buffer_struct(self);
-    uint8_t value = rb_value_to_u8(val);
-    buffer_write(
-        buffer,
-        &value,
-        sizeof(value)
-    );
-    return self;
-}
-
-static VALUE
-buffer_write_u16(VALUE self, VALUE val)
-{
-    Buffer *buffer = get_buffer_struct(self);
-    uint16_t value = rb_value_to_u16(val);
-    buffer_write(
-        buffer,
-        &value,
-        sizeof(value)
-    );
-    return self;
-}
-
-static VALUE
-buffer_write_u32(VALUE self, VALUE val)
-{
-    Buffer *buffer = get_buffer_struct(self);
-    uint32_t value = rb_value_to_u32(val);
-    buffer_write(
-        buffer,
-        &value,
-        sizeof(value)
-    );
-    return self;
-}
-
-static VALUE
-buffer_write_u64(VALUE self, VALUE val)
-{
-    Buffer *buffer = get_buffer_struct(self);
-    uint64_t value = rb_value_to_u64(val);
-    buffer_write(
-        buffer,
-        &value,
-        sizeof(value)
-    );
-    return self;
-}
 static VALUE
 buffer_write_bool(VALUE self, VALUE val)
 {
     if(val != Qtrue && val != Qfalse)
         rb_raise(rb_eTypeError, "expected a boolean value");
     Buffer *buffer = get_buffer_struct(self);
-    uint8_t value = RTEST(val) ? 1 : 0;
+    uint8_t value = (val == Qtrue);
     buffer_write(
         buffer,
         &value,
         sizeof(value)
     );
     return self;
+}
+static VALUE
+buffer_read_bool(VALUE self)
+{
+    Buffer *buffer = get_buffer_struct(self);
+    uint8_t value;
+    buffer_read(
+        buffer,
+        &value,
+        sizeof(value)
+    );
+    return value ? Qtrue : Qfalse;
 }
 
-static VALUE
-buffer_write_i8(VALUE self, VALUE val)
-{
-    Buffer *buffer = get_buffer_struct(self);
-    int8_t value = rb_value_to_i8(val);
-    buffer_write(
-        buffer,
-        &value,
-        sizeof(value)
-    );
-    return self;
-}
-static VALUE
-buffer_write_i16(VALUE self, VALUE val)
-{
-    Buffer *buffer = get_buffer_struct(self);
-    int16_t value = rb_value_to_i16(val);
-    buffer_write(
-        buffer,
-        &value,
-        sizeof(value)
-    );
-    return self;
-}
-static VALUE
-buffer_write_i32(VALUE self, VALUE val)
-{
-    Buffer *buffer = get_buffer_struct(self);
-    int32_t value = rb_value_to_i32(val);
-    buffer_write(
-        buffer,
-        &value,
-        sizeof(value)
-    );
-    return self;
-}
-static VALUE
-buffer_write_i64(VALUE self, VALUE val)
-{
-    Buffer *buffer = get_buffer_struct(self);
-    int64_t value = rb_value_to_i64(val);
-    buffer_write(
-        buffer,
-        &value,
-        sizeof(value)
-    );
-    return self;
-}
+DEFINE_WRITE_METHOD(i8,  int8_t,  rb_value_to_i8)
+DEFINE_WRITE_METHOD(i16, int16_t, rb_value_to_i16)
+DEFINE_WRITE_METHOD(i32, int32_t, rb_value_to_i32)
+DEFINE_WRITE_METHOD(i64, int64_t, rb_value_to_i64)
+DEFINE_READ_METHOD(i8,  int8_t,  rb_i8_to_value)
+DEFINE_READ_METHOD(i16, int16_t, rb_i16_to_value)
+DEFINE_READ_METHOD(i32, int32_t, rb_i32_to_value)
+DEFINE_READ_METHOD(i64, int64_t, rb_i64_to_value)
 
 void
 Init_hikari_buffer_class(void)
@@ -284,6 +251,7 @@ Init_hikari_buffer_class(void)
         "Buffer",
         rb_cObject
     );
+
 
     rb_define_alloc_func(
         rb_cBuffer,
@@ -343,30 +311,26 @@ Init_hikari_buffer_class(void)
         buffer_remaining,
         0
     );
-    rb_define_method(
-        rb_cBuffer,
-        "write_u8",
-        buffer_write_u8,
-        1
-    );
-    rb_define_method(
-        rb_cBuffer,
-        "write_u16",
-        buffer_write_u16,
-        1
-    );
-    rb_define_method(
-        rb_cBuffer,
-        "write_u32",
-        buffer_write_u32,
-        1
-    );
-    rb_define_method(
-        rb_cBuffer,
-        "write_u64",
-        buffer_write_u64,
-        1
-    );
+    DEFINE_WRITE(u8);
+    DEFINE_WRITE(u16);
+    DEFINE_WRITE(u32);
+    DEFINE_WRITE(u64);
+
+    DEFINE_READ(u8);
+    DEFINE_READ(u16);
+    DEFINE_READ(u32);
+    DEFINE_READ(u64);
+
+    DEFINE_WRITE(i8);
+    DEFINE_WRITE(i16);
+    DEFINE_WRITE(i32);
+    DEFINE_WRITE(i64);
+
+    DEFINE_READ(i8);
+    DEFINE_READ(i16);
+    DEFINE_READ(i32);
+    DEFINE_READ(i64);
+
     rb_define_method(
         rb_cBuffer,
         "write_bool",
@@ -375,34 +339,20 @@ Init_hikari_buffer_class(void)
     );
     rb_define_method(
         rb_cBuffer,
-        "write_i8",
-        buffer_write_i8,
-        1
-    );
-    rb_define_method(
-        rb_cBuffer,
-        "write_i16",
-        buffer_write_i16,
-        1
-    );
-    rb_define_method(
-        rb_cBuffer,
-        "write_i32",
-        buffer_write_i32,
-        1
-    );
-    rb_define_method(
-        rb_cBuffer,
-        "write_i64",
-        buffer_write_i64,
-        1
+        "read_bool",
+        buffer_read_bool,
+        0
     );
 }
 
 
 
 
+#undef DEFINE_WRITE_METHOD
+#undef DEFINE_READ_METHOD
 
+#undef DEFINE_WRITE
+#undef DEFINE_READ
 
 
 

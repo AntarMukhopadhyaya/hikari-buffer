@@ -65,6 +65,8 @@ VALUE rb_u64_to_value(uint64_t value)
 }
 
 
+
+
 int8_t
 rb_value_to_i8(VALUE value)
 {
@@ -101,4 +103,21 @@ int64_t
 rb_value_to_i64(VALUE value)
 {
     return (int64_t)NUM2LL(value);
+}
+VALUE rb_i8_to_value(int8_t value)
+{
+    return INT2NUM(value);
+}
+
+VALUE rb_i16_to_value(int16_t value)
+{
+    return INT2NUM(value);
+}
+VALUE rb_i32_to_value(int32_t value)
+{
+    return INT2NUM(value);
+}
+VALUE rb_i64_to_value(int64_t value)
+{
+    return LL2NUM(value);
 }
