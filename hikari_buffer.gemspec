@@ -5,18 +5,18 @@ require_relative "lib/hikari_buffer/version"
 Gem::Specification.new do |spec|
   spec.name = "hikari_buffer"
   spec.version = HikariBuffer::VERSION
-  spec.authors = ["TODO: Write your name"]
-  spec.email = ["TODO: Write your email address"]
+  spec.authors = ["Antar Mukhopadhyaya"]
+  spec.email = ["opensource.antar@gmail.com"]
 
-  spec.summary = "TODO: Write a short summary, because RubyGems requires one."
-  spec.description = "TODO: Write a longer description or delete this line."
-  spec.homepage = "TODO: Put your gem's website or public repo URL here."
+  spec.summary = "Fast binary buffer for Ruby."
+  spec.description = "A native C extension providing fast binary serialization and deserialization for primitive data types, strings, and raw bytes."
+  spec.homepage = "https://github.com/AntarMukhopadhyaya/hikari-buffer"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
-  spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
+  spec.metadata["allowed_push_host"] = "https://rubygems.org"
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "TODO: Put your gem's public repo URL here."
-  spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
+  spec.metadata["source_code_uri"] = "https://github.com/AntarMukhopadhyaya/hikari-buffer"
+  spec.metadata["changelog_uri"] = "https://github.com/AntarMukhopadhyaya/hikari-buffer/blob/main/CHANGELOG.md"
 
   # Uncomment the line below to require MFA for gem pushes.
   # This helps protect your gem from supply chain attacks by ensuring
