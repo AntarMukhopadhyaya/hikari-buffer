@@ -1,43 +1,146 @@
-# HikariBuffer
+# Hikari Buffer
 
-TODO: Delete this and the text below, and describe your gem
+[![Ruby](https://github.com/AntarMukhopadhyaya/hikari-buffer/actions/workflows/main.yml/badge.svg)](https://github.com/AntarMukhopadhyaya/hikari-buffer/actions/workflows/main.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/hikari_buffer`. To experiment with that code, run `bin/console` for an interactive prompt.
+A fast, lightweight binary buffer for Ruby built as a native C extension. Hikari Buffer provides efficient serialization and deserialization of primitive data types, strings, and raw bytes through a clean, chainable API.
+
+## Features
+
+* 🚀 Native C extension for maximum performance
+* 📦 Binary serialization and deserialization
+* 🔢 Signed integers (`i8`, `i16`, `i32`, `i64`)
+* 🔢 Unsigned integers (`u8`, `u16`, `u32`, `u64`)
+* 🌊 Floating-point numbers (`f32`, `f64`)
+* ✅ Boolean support
+* 📝 UTF-8 string serialization
+* 📄 Raw byte serialization
+* 🎯 Cursor-based reading and writing
+* 🔄 Automatic buffer growth
+* 🧪 Comprehensive RSpec test suite
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
-
-Install the gem and add to the application's Gemfile by executing:
+### RubyGems
 
 ```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+gem install hikari_buffer
 ```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+### Bundler
 
-```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+```ruby
+gem "hikari_buffer"
 ```
 
-## Usage
+## Quick Start
 
-TODO: Write usage instructions here
+```ruby
+require "hikari_buffer"
+
+buffer = Hikari::Buffer.new
+
+buffer
+  .write_u32(42)
+  .write_bool(true)
+  .write_f64(Math::PI)
+  .write_string("Hello, Hikari!")
+
+buffer.rewind
+
+puts buffer.read_u32
+puts buffer.read_bool
+puts buffer.read_f64
+puts buffer.read_string
+```
+
+## Supported Types
+
+| Type   | Read | Write |
+| ------ | :--: | :---: |
+| u8     |   ✅  |   ✅   |
+| u16    |   ✅  |   ✅   |
+| u32    |   ✅  |   ✅   |
+| u64    |   ✅  |   ✅   |
+| i8     |   ✅  |   ✅   |
+| i16    |   ✅  |   ✅   |
+| i32    |   ✅  |   ✅   |
+| i64    |   ✅  |   ✅   |
+| f32    |   ✅  |   ✅   |
+| f64    |   ✅  |   ✅   |
+| bool   |   ✅  |   ✅   |
+| bytes  |   ✅  |   ✅   |
+| string |   ✅  |   ✅   |
+
+## Buffer API
+
+```ruby
+buffer.capacity
+buffer.size
+buffer.cursor
+buffer.tell
+buffer.remaining
+
+buffer.seek(position)
+buffer.rewind
+buffer.clear
+```
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+Clone the repository and install dependencies:
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+```bash
+git clone https://github.com/AntarMukhopadhyaya/hikari-buffer.git
+cd hikari-buffer
+bundle install
+```
+
+Compile the native extension:
+
+```bash
+bundle exec rake compile
+```
+
+Run the test suite:
+
+```bash
+bundle exec rspec
+```
+
+Run RuboCop:
+
+```bash
+bundle exec rubocop
+```
+
+## Roadmap
+
+* [x] Primitive integer serialization
+* [x] Floating-point serialization
+* [x] Boolean serialization
+* [x] String serialization
+* [x] Raw byte serialization
+* [x] Automatic buffer growth
+* [ ] Peek operations
+* [ ] Endianness support
+* [ ] Array serialization
+* [ ] UUID serialization
+* [ ] Benchmarks
+* [ ] Precompiled native gems for Windows, Linux, and macOS
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/hikari_buffer. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/hikari_buffer/blob/master/CODE_OF_CONDUCT.md).
+Bug reports, feature requests, and pull requests are welcome.
+
+If you'd like to contribute:
+
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for your changes
+4. Ensure all tests pass
+5. Open a Pull Request
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-
-## Code of Conduct
-
-Everyone interacting in the HikariBuffer project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/hikari_buffer/blob/master/CODE_OF_CONDUCT.md).
+Released under the MIT License. See the `LICENSE` file for details.

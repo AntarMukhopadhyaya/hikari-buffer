@@ -8,6 +8,28 @@ RSpec::Core::RakeTask.new(:spec)
 require "rubocop/rake_task"
 
 RuboCop::RakeTask.new
+namespace :bench do
+  Dir.glob("bench/*.rb").sort.each do |file|
+    name = File.basename(file, ".rb")
+
+    desc "Run #{name} benchmark"
+    task name.to_sym do
+      ruby file
+    end
+  end
+
+  desc "Run all benchmarks"
+  task :all do
+    Dir.glob("bench/*.rb").sort.each do |file|
+      puts
+      puts "=" * 80
+      puts "Running #{File.basename(file)}"
+      puts "=" * 80
+
+      ruby file
+    end
+  end
+end
 
 require "rake/extensiontask"
 

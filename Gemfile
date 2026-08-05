@@ -13,3 +13,5 @@ gem "rake-compiler"
 gem "rspec", "~> 3.0"
 
 gem "rubocop", "~> 1.21"
+
+gem "benchmark-ips", "~> 2.15", group: :development
