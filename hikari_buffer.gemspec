@@ -9,7 +9,8 @@ Gem::Specification.new do |spec|
   spec.email = ["opensource.antar@gmail.com"]
 
   spec.summary = "Fast binary buffer for Ruby."
-  spec.description = "A native C extension providing fast binary serialization and deserialization for primitive data types, strings, and raw bytes."
+  spec.description = "A native C extension providing fast binary serialization"\
+                    "and deserialization for primitive data types, strings, and raw bytes."
   spec.homepage = "https://github.com/AntarMukhopadhyaya/hikari-buffer"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
