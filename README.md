@@ -1,9 +1,19 @@
 # Hikari Buffer
 
 [![Ruby](https://github.com/AntarMukhopadhyaya/hikari-buffer/actions/workflows/main.yml/badge.svg)](https://github.com/AntarMukhopadhyaya/hikari-buffer/actions/workflows/main.yml)
+[![Gem Version](https://badge.fury.io/rb/hikari_buffer.svg)](https://badge.fury.io/rb/hikari_buffer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A fast, lightweight binary buffer for Ruby built as a native C extension. Hikari Buffer provides efficient serialization and deserialization of primitive data types, strings, and raw bytes through a clean, chainable API.
+
+## Why Hikari Buffer?
+
+Hikari Buffer is designed for applications that require efficient binary
+serialization, such as network protocols, game development, file formats,
+and custom binary data processing.
+
+Implemented as a native C extension, it avoids much of the overhead of
+pure Ruby implementations while exposing a simple Ruby API.
 
 ## Features
 
@@ -48,11 +58,26 @@ buffer
 
 buffer.rewind
 
-puts buffer.read_u32
-puts buffer.read_bool
-puts buffer.read_f64
-puts buffer.read_string
+puts buffer.read_u32      # => 42
+puts buffer.read_bool     # => true
+puts buffer.read_f64      # => 3.141592653589793
+puts buffer.read_string   # => "Hello, Hikari!"
 ```
+
+### Method Chaining
+
+All write operations return the buffer itself, allowing a fluent API.
+
+```ruby
+buffer
+  .write_u8(255)
+  .write_i32(-42)
+  .write_f32(1.5)
+  .write_bool(true)
+  .write_string("Ruby")
+```
+
+This makes building binary packets concise and expressive.
 
 ## Supported Types
 
@@ -122,11 +147,11 @@ bundle exec rubocop
 * [x] String serialization
 * [x] Raw byte serialization
 * [x] Automatic buffer growth
-* [ ] Peek operations
+* [x] Peek operations
+* [x] Benchmarks
 * [ ] Endianness support
 * [ ] Array serialization
 * [ ] UUID serialization
-* [ ] Benchmarks
 * [ ] Precompiled native gems for Windows, Linux, and macOS
 
 ## Contributing
